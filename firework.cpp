@@ -8,6 +8,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <random>
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -80,6 +81,17 @@ void display()
 {
    glClear(GL_COLOR_BUFFER_BIT);
 
+   for(int i = 0; i < rand() % 10; i++) {
+      glBegin(GL_LINE_STRIP);
+
+      for(int j = 0; j < i; j++) {
+         glColor3f(1.0, 1.0, 1.0);
+         glVertex2f(-0.5, -0.5);
+      }
+
+      glEnd();
+   }
+
    // Draw red lines
    glBegin(GL_LINE_STRIP);
    glColor3f(1.0, 0.0, 0.0);
@@ -87,12 +99,6 @@ void display()
    split(-0.5, -0.5, 0.5, 0.5, 0.3);
    glEnd();
 
-   // Draw green lines
-   glBegin(GL_LINE_STRIP);
-   glColor3f(0.0, 1.0, 0.0);
-   glVertex2f(0.5, -0.5);
-   split(0.5, -0.5, -0.5, 0.5, 0.1);
-   glEnd();
    glFlush();
    return;
 
@@ -113,7 +119,7 @@ int main(int argc, char *argv[])
    glutInitWindowSize(500, 500);
    glutInitWindowPosition(250, 250);
    glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
-   glutCreateWindow("Line-Split");
+   glutCreateWindow("Firework");
    glutDisplayFunc(display);
    init();
    glutMainLoop();
