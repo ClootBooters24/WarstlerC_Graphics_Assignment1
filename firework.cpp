@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <random>
+#include <cmath>
 #ifdef MAC
 #include <GLUT/glut.h>
 #else
@@ -19,48 +20,6 @@
 #include <fstream>
 #include <vector>
 using namespace std;
-
-float MIN_LENGTH = 0.02;
-vector<float> xpos;
-vector<float> ypos;
-
-//---------------------------------------
-// Calculate random value between [-R..R]
-//---------------------------------------
-float myrand(float R)
-{
-   return (2 * R * rand()) / RAND_MAX - R;
-}
-
-//---------------------------------------
-// Recursive function to split lines
-//---------------------------------------
-void split(float x1, float y1, float x2, float y2, float rough)
-{
-   // Check terminating condition
-   float dx = x2 - x1;
-   float dy = y2 - y1;
-   float length = sqrt(dx * dx + dy * dy);
-   if (length <= MIN_LENGTH)
-   {
-      // Draw next point in line strip
-      glVertex2f(x2, y2);
-      xpos.push_back(x2);
-      ypos.push_back(y2);
-   }
-
-   // Handle recursive case
-   else
-   {
-      // Generate midpoint with random displacement
-      float xmid = (x2 + x1) / 2 + myrand(length*rough);
-      float ymid = (y2 + y1) / 2 + myrand(length*rough);
-
-      // Perform recursive calls
-      split(x1, y1, xmid, ymid, rough);
-      split(xmid, ymid, x2, y2, rough);
-   }
-}
 
 //---------------------------------------
 // Init function for OpenGL
@@ -81,33 +40,38 @@ void display()
 {
    glClear(GL_COLOR_BUFFER_BIT);
 
-   for(int i = 0; i < rand() % 10; i++) {
-      glBegin(GL_LINE_STRIP);
+   int numFireworks = rand() % 10 + 5;
+   float pointsX[numFireworks] = {};
+   float pointsY[numFireworks] = {};
 
-      for(int j = 0; j < i; j++) {
-         glColor3f(1.0, 1.0, 1.0);
-         glVertex2f(-0.5, -0.5);
-      }
-
+   for(int i = 0; i < numFireworks; i++) {
+      // colors[i][0] = rand() % 256;
+      pointsX[i] = (-1 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(2)))); 
+      pointsY[i] = (-1 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(2))));
+      glBegin(GL_POINTS);
+      glColor3f((float) rand() / (RAND_MAX), (float) rand() / (RAND_MAX), (float) rand() / (RAND_MAX));
+      glVertex2f(pointsX[i], pointsY[i]);
       glEnd();
-   }
 
-   // Draw red lines
-   glBegin(GL_LINE_STRIP);
-   glColor3f(1.0, 0.0, 0.0);
-   glVertex2f(-0.5, -0.5);
-   split(-0.5, -0.5, 0.5, 0.5, 0.3);
-   glEnd();
+      glBegin(GL_LINES);
+      glColor3f((float) rand() / (RAND_MAX), (float) rand() / (RAND_MAX), (float) rand() / (RAND_MAX));
+      // glVertex2f(pointsX[i], pointsY[i]);
+      float size = (float) rand() / (RAND_MAX);
+
+      for (int j = 0; j < 20; j++) {
+         glVertex2f(pointsX[i], pointsY[i]);
+         float angle = 2 * M_PI * j / 20;
+         float dx = cos(angle) * size; // Adjust the length by multiplying with a factor (e.g., 0.5)
+         float dy = sin(angle) * size; // Adjust the length by multiplying with a factor (e.g., 0.5)
+         glVertex2f(pointsX[i] + dx, pointsY[i] + dy);
+      }
+      
+      glEnd();
+
+   }
 
    glFlush();
    return;
-
-   // Save lines
-   ofstream dout;
-   dout.open("lines.csv");
-   for (int i=0; i<xpos.size(); i++)
-      dout << xpos[i] << "," << ypos[i] << endl;
-   dout.close();
 }
 
 //---------------------------------------
